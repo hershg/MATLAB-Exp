@@ -1,0 +1,197 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Characterization of Dose-Response Behavior</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-11-14"><meta name="DC.source" content="Analysis.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Characterization of Dose-Response Behavior</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Data Import</a></li><li><a href="#3">Characterize the dose-response behavior</a></li><li><a href="#4">Analysis of Variance for Estimated Parameter, EC50, vs Grouping variables</a></li><li><a href="#5">n-way ANOVA</a></li></ul></div><p>The aim of this analysis is to characterize the dose response behavior of 4 different drug candidates in a population. The objective of this analysis is investigate the how the treatments differ, based on theor EC50 values. We will also investigate if subject demographics, like Age and Gender, contribute to difference in the observed EC50.</p><pre class="codeinput"><span class="comment">% Copyright 2011 - 2012 MathWorks, Inc.</span>
+
+close <span class="string">all</span>, clear , clc
+</pre><h2>Data Import<a name="2"></a></h2><p>Data.xlsx contains dose-response data from 20 patients, equally divided amongst 4 different treatment groups (5 subjects per group). Each treatment group was assigned to a different drug candidates. The same dosing range was used for all treatment groups.</p><pre class="codeinput"><span class="comment">% Import the data as a dataset object.</span>
+[ID,Dose,Response,Tmt,Age,Gender] = importfile(<span class="string">'Data.xlsx'</span>);
+</pre><h2>Characterize the dose-response behavior<a name="3"></a></h2><p>Use a simple sigmoidal model to characterize the response to Drug B</p><p><img src="Analysis_eq11658.png" alt="$$ R = \frac{E_{max}*{Dose}^{n}}{{EC_{50}}^{n} + {Dose}^{n}}$$"></p><pre class="codeinput"><span class="comment">% Get all unique IDs</span>
+allIDs  = unique(ID)       ; <span class="comment">% get unique subject  ID</span>
+
+<span class="comment">% Preallocate</span>
+iTmt     = cell(size(allIDs)) ;
+iAge     = cell(size(allIDs)) ;
+iGender  = cell(size(allIDs)) ;
+iEC50    = nan(size(allIDs)) ;
+iEmax    = nan(size(allIDs)) ;
+
+<span class="keyword">for</span> i = 1:length(allIDs)
+
+    idx = ID == allIDs(i)       ; <span class="comment">% Extract indices for subject i</span>
+
+  <span class="comment">% Extract data for current ID</span>
+    iDose     = Dose(idx) ;
+    iResponse = Response(idx) ;
+
+  <span class="comment">% Fit data</span>
+    model       = createFit_v1(iDose, iResponse) ;
+    iEC50(i)    = model.EC50                ;
+
+  <span class="comment">% Save demographic/treatment variable for subject</span>
+    iTmt(i)  = unique(Tmt(idx))    ;
+    iAge(i)  = unique(Age(idx))    ;
+    iGender(i)  = unique(Gender(idx))    ;
+
+<span class="keyword">end</span>
+
+<span class="comment">% Save Results</span>
+results = dataset(allIDs, iTmt, iAge, iGender, iEC50, <span class="string">'VarNames'</span>, {<span class="string">'ID'</span>, <span class="string">'Tmt'</span>, <span class="string">'Age'</span>, <span class="string">'Gndr'</span>, <span class="string">'EC50'</span>})  ;
+export(results, <span class="string">'xlsfile'</span>, <span class="string">'Results.xlsx'</span>) ;
+winopen(<span class="string">'Results.xlsx'</span>)
+</pre><img vspace="5" hspace="5" src="Analysis_01.png" alt=""> <h2>Analysis of Variance for Estimated Parameter, EC50, vs Grouping variables<a name="4"></a></h2><p>Perform a n-way analysis of variance to test if mean EC50 (from 5 subjects) is significantly different across the treatment groups, age groups and gender. If p is near zero (typically less than 0.01 or 0.05), it casts doubt on the null hypothesis and suggests that at least one sample mean is significantly different than the other sample means.</p><pre class="codeinput"><span class="comment">% Plot EC50 vs. group variables</span>
+figure; boxplot(results.EC50, results.Age)   ; xlabel(<span class="string">'Age Group'</span>);
+figure; boxplot(results.EC50, results.Gndr)  ; xlabel(<span class="string">'Gender'</span>)  ;
+figure; boxplot(results.EC50, results.Tmt)   ; xlabel(<span class="string">'Tmt Group'</span>);
+</pre><img vspace="5" hspace="5" src="Analysis_02.png" alt=""> <img vspace="5" hspace="5" src="Analysis_03.png" alt=""> <img vspace="5" hspace="5" src="Analysis_04.png" alt=""> <h2>n-way ANOVA<a name="5"></a></h2><pre class="codeinput">[~, ~, stats] = anovan(results.EC50, {results.Tmt, results.Age, results.Gndr}, <span class="keyword">...</span>
+                      <span class="string">'varnames'</span>, {<span class="string">'Tmt'</span>, <span class="string">'Age'</span>, <span class="string">'Gndr'</span>}) ;
+
+close <span class="string">all</span>
+</pre><img vspace="5" hspace="5" src="Analysis_05.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Characterization of Dose-Response Behavior 
+%%
+% The aim of this analysis is to characterize the dose response behavior of
+% 4 different drug candidates in a population. The objective of this
+% analysis is investigate the how the treatments differ, based on theor
+% EC50 values. We will also investigate if subject demographics, like Age
+% and Gender, contribute to difference in the observed EC50.
+
+% Copyright 2011 - 2012 MathWorks, Inc.
+
+close all, clear , clc
+
+%% Data Import
+% Data.xlsx contains dose-response data from 20 patients, equally divided
+% amongst 4 different treatment groups (5 subjects per group). Each
+% treatment group was assigned to a different drug candidates. The same
+% dosing range was used for all treatment groups.
+
+% Import the data as a dataset object.
+[ID,Dose,Response,Tmt,Age,Gender] = importfile('Data.xlsx');
+
+%% Characterize the dose-response behavior 
+% Use a simple sigmoidal model to characterize the response to Drug B
+% 
+% $$ R = \frac{E_{max}*{Dose}^{n}}{{EC_{50}}^{n} + {Dose}^{n}}$$
+% 
+
+% Get all unique IDs
+allIDs  = unique(ID)       ; % get unique subject  ID
+
+% Preallocate
+iTmt     = cell(size(allIDs)) ; 
+iAge     = cell(size(allIDs)) ; 
+iGender  = cell(size(allIDs)) ;  
+iEC50    = nan(size(allIDs)) ; 
+iEmax    = nan(size(allIDs)) ;   
+
+for i = 1:length(allIDs)
+    
+    idx = ID == allIDs(i)       ; % Extract indices for subject i   
+ 
+  % Extract data for current ID  
+    iDose     = Dose(idx) ; 
+    iResponse = Response(idx) ;
+   
+  % Fit data
+    model       = createFit_v1(iDose, iResponse) ;
+    iEC50(i)    = model.EC50                ;
+
+  % Save demographic/treatment variable for subject
+    iTmt(i)  = unique(Tmt(idx))    ; 
+    iAge(i)  = unique(Age(idx))    ; 
+    iGender(i)  = unique(Gender(idx))    ; 
+     
+end 
+
+% Save Results 
+results = dataset(allIDs, iTmt, iAge, iGender, iEC50, 'VarNames', {'ID', 'Tmt', 'Age', 'Gndr', 'EC50'})  ; 
+export(results, 'xlsfile', 'Results.xlsx') ;
+winopen('Results.xlsx')
+
+
+%% Analysis of Variance for Estimated Parameter, EC50, vs Grouping variables
+% Perform a n-way analysis of variance to test if mean EC50 (from 5
+% subjects) is significantly different across the treatment groups, age
+% groups and gender. If p is near zero (typically less than 0.01 or 0.05),
+% it casts doubt on the null hypothesis and suggests that at least one
+% sample mean is significantly different than the other sample means.
+
+% Plot EC50 vs. group variables
+figure; boxplot(results.EC50, results.Age)   ; xlabel('Age Group'); 
+figure; boxplot(results.EC50, results.Gndr)  ; xlabel('Gender')  ;  
+figure; boxplot(results.EC50, results.Tmt)   ; xlabel('Tmt Group'); 
+
+%% n-way ANOVA
+[~, ~, stats] = anovan(results.EC50, {results.Tmt, results.Age, results.Gndr}, ...
+                      'varnames', {'Tmt', 'Age', 'Gndr'}) ;
+  
+close all
+
+##### SOURCE END #####
+--></body></html>
